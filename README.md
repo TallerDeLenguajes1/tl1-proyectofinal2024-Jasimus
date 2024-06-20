@@ -16,7 +16,9 @@ El leñador dará un achazo en el momento que el jugador termine una palabra.
 A medida que se avanza con las competencias, el leñador puede mejorar una de estas características:
 
 **>** _Fuerza_: el leñador necesitará menos achazos para deribar el árbol (esto puede verse como un parámetro inversamente proporcional a la cantidad de palabras que necesita escribir el jugador antes de que caiga el árbol de su lado). El límite de fuerza es aquella que no supera a la que deja aparecer 2 palabras.
+
 **>** _Velocidad_: el leñador talará más rápido (esto puede verse como que al jugador le aparecen palabras más cortas). El límite de velocidad es aquella que no supera a la que deja aparecer 2 letras.
+
 **>** _Suerte_: los contrincantes pueden ser de otros países, con otro idioma. Las palabras que tendrá que escribir el jugador serán en el idioma del contrincante. La suerte ayuda a que tu contrincante sea de algún país que hable español. La suerte puede aumentar hasta un 100%, es decir, el 100% de las veces tu contrincante hablará español.
 
 
