@@ -27,3 +27,20 @@ A medida que se avanza con las competencias, el leñador puede mejorar una de es
 El jugador podrá elegir la cantidad de partidas totales, en un intervalo de 3 a 10. 
 Como las palabras van a tener un máximo de 12 letras, no tiene sentido ir más allá de las 10 partidas, además que ya va a ser largo para el jugador más que eso.
 
+## API
+https://random-word-api.herokuapp.com/
+
+
+## Notas
+
+Se modifica un poco la forma de las partidas si se cumple que es una batalla por turnos. Lo que haría es:
+
+1- La fuerza con la que el leñador le pegue al árbol depende también de la velocidad con la que escriba, y que tenga un límite de tiempo para escribirlas. El árbol se derriba si se alcanza una fuerza total, que se calcularía: **cantGolpes = cantPalabrasO - Fuerza**, donde **cantPalabrasO** depende del tipo de leñador que haya elegido el usuario al empezar la partida.
+La fuerza con la que pega el leñador es:
+**fuerzaGolpe = 1 + maxGolpe*tiempoRestante**
+donde:
+*maxGolpe*= es la fuerza máxima con la que puede pegar el leñador; la probabilidad de un valor alto es proporcional a la suete del mismo. Es algo así como un golpe crítico. Sería interesante que este valor se obtenga al momento de que termine el turno del jugador.
+
+*tiempoRestante*= como el leñador tiene un límite de tiempo para escribir la palabra, este tiempo es: **tiempoDisponible - tiempoDeEscritura**, y a su vez *tiempoDeEscritura = **momentoDeFinalización - momentoDeIniciación***.
+
+momentoDeFinalización es float --> tiempoDeEscritura es float --> tiempoRestante es float --> fuerzaGolpe es float; cantGolpes designa la cantidad de golpes que faltan para derribar el árbol. Si **cantGolpesSig = cantGolpesAnt - fuerzaGolpe**, lo conveniente es comprobar si *cantGolpesSig* es <= 0.
