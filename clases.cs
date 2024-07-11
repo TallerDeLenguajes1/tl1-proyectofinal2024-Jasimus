@@ -4,19 +4,28 @@ namespace clases
 {
     public class Personaje
     {
-        public HttpClient Client = new HttpClient();
         private Random randi = new Random();
-        public float Fuerza { get; set; }
-        public float Velocidad { get; set; }
-        public float Suerte { get; set; }
-        public int CantGolpesIni { get; set; }
+        private float sumaVel = 0;
+        private int cantPalabrasEs = 0;
+
+        public HttpClient Client = new HttpClient();
+        public int Fuerza { get; set; }
+        public int Velocidad { get; set; }
+        public int Suerte { get; set; }
         public bool turno { get; set; }
-        public float SumaVelocidades { get; set; }
-        public int CantPalabrasEscritas { get; set; }
+        public float SumaVelocidades { get => sumaVel; set => sumaVel = value; }
+        public int CantPalabrasEscritas { get => cantPalabrasEs; set => cantPalabrasEs = value; }
 
         public float VelocidadMedia()
         {
-            return SumaVelocidades/CantPalabrasEscritas;
+            if(cantPalabrasEs == 0)
+            {
+                return 0;
+            }
+            else
+            {
+                return sumaVel/cantPalabrasEs;
+            }
         }
         
         public double FuerzaGolpe(double S, double media, int cantGolpes, int TiempoRestante, int TiempoDisponible)
@@ -25,7 +34,7 @@ namespace clases
             double MaxRand = 1/(Math.Exp((cantGolpes/2 - 1)*Math.Log(S)+Math.Log(b))+1);
             int numero = randi.Next(0, (int)MaxRand);
             
-            return 1 + Sigmoide_inversa(numero, S, b)*(double)TiempoRestante/TiempoDisponible;
+            return 1 + Sigmoide_inversa(numero, S, b)*Velocidad;
         }
 
         private double Sigmoide_inversa(double x, double S, double b)       //mapea los valores de una V.A con dist. uniforme a una con distribución aprox. normal
@@ -48,11 +57,13 @@ namespace clases
 
     public class Arbol
     {
-        public double LadoJugador { get; set; }
+        private bool cayo = false;
+
+        public int LadoJugador { get; set; }
         public double LadoOtro { get; set; }
-        public bool Cayo { get; set; }
+        public bool Cayo { get => cayo; };
         
-        public void LadoJugadorMetodo(int cantGolpesInicial, float fuerzaPj)
+        public void LadoJugadorMetodo(int cantGolpesInicial, int fuerzaPj)
         {
             LadoJugador = cantGolpesInicial - fuerzaPj;
         }
@@ -64,11 +75,11 @@ namespace clases
 
         public void GolpeJugador(double fuerzaGolpe)
         {
-            LadoJugador -= fuerzaGolpe;
+            LadoJugador -= Math.Round(fuerzaGolpe);
 
             if(LadoJugador <= 0)
             {
-                Cayo = true;
+                cayo = true;
             }
         }
 
@@ -78,7 +89,7 @@ namespace clases
 
             if(LadoOtro <= 0)
             {
-                Cayo = true;
+                cayo = true;
             }
         }
     }
@@ -108,12 +119,14 @@ namespace clases
                 Thread.Sleep(TiempoDisponible);
                 reloj.Stop();
                 timer.Dispose();
+                Critico = false;
                 Console.WriteLine("perdiste tu turno");
             }
             catch(TimerInterruptedException)
             {
                 if(reloj.ElapsedMilliseconds <= TiempoDisponible/3)
                 {
+                    Critico = true;
                     TiempoRestante = TiempoDisponible;
                 }
                 else
@@ -129,17 +142,6 @@ namespace clases
             MainThread.Interrupt();
         }
 
-        
-    }
-
-    public class PersonajesJson
-    {
-        void GuardarPersonajes(List<Personaje> pers , string url)
-        {
-            
-        }
-
-
         async Task<List<string>> PedirPalabras(Lenguaje idio, int cantidad, int largo, HttpClient client)
         {
             string url = $"https://random-word-api.herokuapp.com/word?lang={idio}&number={cantidad}&length={largo}";
@@ -151,6 +153,15 @@ namespace clases
 
             return palabras;
         }
+    }
+
+    public class PersonajesJson
+    {
+        void GuardarPersonajes(List<Personaje> pers , string url)
+        {
+            
+        }
+
 
     }
 
@@ -159,7 +170,6 @@ namespace clases
         es,
         de,
         fr,
-        it,
-        zh
+        it
     }
 }
