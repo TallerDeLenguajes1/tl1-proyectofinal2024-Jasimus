@@ -35,12 +35,18 @@ https://random-word-api.herokuapp.com/
 
 Se modifica un poco la forma de las partidas si se cumple que es una batalla por turnos. Lo que haría es:
 
-1- La fuerza con la que el leñador le pegue al árbol depende también de la velocidad con la que escriba, y que tenga un límite de tiempo para escribirlas. El árbol se derriba si se alcanza una fuerza total, que se calcularía: **cantGolpes = cantPalabrasO - Fuerza**, donde **cantPalabrasO** depende del tipo de leñador que haya elegido el usuario al empezar la partida.
+1- La fuerza con la que el leñador le pegue al árbol depende también de la velocidad con la que escriba, y que tenga un límite de tiempo para escribirlas. El árbol se derriba si se alcanza una fuerza total, que se calcularía: **cantGolpes = cantPalabrasO - Fuerza**, donde **cantPalabrasO** es la cantidad de palabras máxima que se pueden escribir.
 La fuerza con la que pega el leñador es:
-**fuerzaGolpe = 1 + maxGolpe*tiempoRestante**
+**fuerzaGolpe = 1 + maxGolpe*tiempoRestante/tiempoDisponible**
 donde:
 *maxGolpe*= es la fuerza máxima con la que puede pegar el leñador; la probabilidad de un valor alto es proporcional a la suete del mismo. Es algo así como un golpe crítico. Sería interesante que este valor se obtenga al momento de que termine el turno del jugador.
 
 *tiempoRestante*= como el leñador tiene un límite de tiempo para escribir la palabra, este tiempo es: **tiempoDisponible - tiempoDeEscritura**, y a su vez *tiempoDeEscritura = **momentoDeFinalización - momentoDeIniciación***.
 
 momentoDeFinalización es float --> tiempoDeEscritura es float --> tiempoRestante es float --> fuerzaGolpe es float; cantGolpes designa la cantidad de golpes que faltan para derribar el árbol. Si **cantGolpesSig = cantGolpesAnt - fuerzaGolpe**, lo conveniente es comprobar si *cantGolpesSig* es <= 0.
+
+## Partida
+> El jugador tiene un tiempo para escribir la palabra (*tiempoDispobible*). Si pasa ese tiempo, pierde el turno.
+> El jugador tiene un tiempo de *tiempoDispoble/4* para escribir la palabra y sacar crítico. Si pasa ese tiempo, se continúa con la cuenta del *tiempoDisponible*.
+> El golpe crítico se obtiene si el *tiempoDeEscritura = 0*, donde *tiempoDeEscritura = momentoDeFinalización - momentoDeIniciación*.
+> Para que sea posible que *momentoDeFinalización = momentoDeIniciación*, el tiempo de escritura se empieza a contar *tiempoDisponible/4* después del inicio del turno.
