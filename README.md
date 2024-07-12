@@ -50,3 +50,9 @@ momentoDeFinalización es float --> tiempoDeEscritura es float --> tiempoRestant
 > El jugador tiene un tiempo de *tiempoDispoble/4* para escribir la palabra y sacar crítico. Si pasa ese tiempo, se continúa con la cuenta del *tiempoDisponible*.
 > El golpe crítico se obtiene si el *tiempoDeEscritura = 0*, donde *tiempoDeEscritura = momentoDeFinalización - momentoDeIniciación*.
 > Para que sea posible que *momentoDeFinalización = momentoDeIniciación*, el tiempo de escritura se empieza a contar *tiempoDisponible/4* después del inicio del turno.
+
+El valor máximo de la velocidad es la velocidad para la cuál la cantidad de letras de las palabras es igual a 2.
+
+El valor máximo de la fuerza es *cantidad de golpes Iniciales/2*.
+
+EL valor máximo de la suerte es *1/(Math.Exp((cantGolpes/2 - 1)*Math.Log(S)+Math.Log(b))+1)*.
