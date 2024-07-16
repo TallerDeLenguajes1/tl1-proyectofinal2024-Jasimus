@@ -19,7 +19,7 @@ double fuerzaGolpe;
 
 List<string> PalabrasRonda = new List<string>();
 Random idiomaRandom = new Random();
-
+Console.Clear();
 do
 {
     Console.WriteLine("ingrese la cantidad de rondas (mayor a cero): ");
@@ -52,13 +52,13 @@ switch (tipoLeniador)
         pj1.Velocidad = 2;
         break;
 }
-
+Console.Clear();
 arbol.Sigue = true;
 PersonajesJson personajesJson = new PersonajesJson();
 List<Personaje> PContra = personajesJson.ObtenerPersonajes(cantRondasInt);
 List<Personaje> PContraPartida = new List<Personaje>();
 
-while(rondaActual <= cantRondasInt)
+while(true)
 {
     if(PContra.Count() != 0)
     {
@@ -77,7 +77,8 @@ while(rondaActual <= cantRondasInt)
         PalabrasRonda = await partida.PedirPalabras(/*idioma*/Lenguaje.es, cantPalabras, LargoPalabras - pj1.Velocidad, pj1.Client);
         int indice = 0;
         pj1.Turno = true;
-        while(!arbol.Cayo)
+        arbol.Cayo = false;
+        while(true)
         {
             if(pj1.Turno)
             {
@@ -110,6 +111,7 @@ while(rondaActual <= cantRondasInt)
                     Console.WriteLine("FALLO");
                     Console.ForegroundColor = ConsoleColor.White;
                 }
+                Thread.Sleep(1000);
                 pj1.Turno = false;
                 indice++;
             }
@@ -124,43 +126,77 @@ while(rondaActual <= cantRondasInt)
                         Console.WriteLine("hizo crítico: "+fuerzaGolpeOtro);
                         Console.ForegroundColor = ConsoleColor.White;
                 }
+                Thread.Sleep(1000);
                 pj1.Turno = true;
             }
+            if(!arbol.Cayo)
+            {
+                Console.Clear();
+            }
+            else
+            {
+                break;
+            }
+        }
+        if(arbol.Sigue)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("el árbol cayó para TU lado. GANASTE");
+            Console.ForegroundColor = ConsoleColor.White;
+            Thread.Sleep(1000);
+        }
+        else
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("el árbol cayó para el lado del otro. PERDISTE");
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+        PContra.Remove(Otro);
+        PalabrasRonda.Clear();
+        rondaActual++;
+        if(rondaActual <= cantRondasInt && arbol.Sigue)
+        {
+            Console.WriteLine("Pasas a la siguiente ronda");
+            Thread.Sleep(2000);
+            Console.Clear();
+            do
+            {
+                Console.WriteLine("¿Qué deseas mejorar?\nFuerza\nVelocidad\nSuerte");
+                mejora =Console.ReadLine();
+            }while(string.Compare(mejora, "Fuerza") != 0 && string.Compare(mejora, "Velocidad") != 0 && string.Compare(mejora, "Suerte") != 0);
+            switch(mejora)
+            {
+                case "Fuerza":
+                    pj1.AumentarFuerza();
+                    Console.WriteLine("aumentaste tu fuerza a: "+pj1.Fuerza);
+                    break;
+                case "Velocidad":
+                    pj1.AumentarVelocidad();
+                    Console.WriteLine("aumentaste tu velocidad a: "+pj1.Velocidad);
+                    break;
+                case "Suerte":
+                    pj1.AumentarSuerte();
+                    Console.WriteLine("aumentaste tu suete a: "+pj1.Suerte);
+                    break;
+            }
+            if(LargoPalabras <= 7)
+            {
+                LargoPalabras++;
+            }
+            if(cantPalabras <= 10)
+            {
+                cantPalabras++;
+            }
+            Console.Clear();
+        }
+        else
+        {
+            break;
         }
     }
-    PContra.Remove(Otro);
-    PalabrasRonda.Clear();
-    rondaActual++;
-    Console.WriteLine("Pasas a la siguiente ronda");
-    Thread.Sleep(500);
-    do
+    else
     {
-        Console.WriteLine("¿Qué deseas mejorar?\nFuerza\nVelocidad\nSuerte");
-        mejora =Console.ReadLine();
-    }while(string.Compare(mejora, "Fuerza") != 0 && string.Compare(mejora, "Velocidad") != 0 && string.Compare(mejora, "Suerte") != 0);
-
-    switch(mejora)
-    {
-        case "Fuerza":
-            pj1.AumentarFuerza();
-            Console.WriteLine("aumentaste tu fuerza a: "+pj1.Fuerza);
-            break;
-        case "Velocidad":
-            pj1.AumentarVelocidad();
-            Console.WriteLine("aumentaste tu velocidad a: "+pj1.Velocidad);
-            break;
-        case "Suerte":
-            pj1.AumentarSuerte();
-            Console.WriteLine("aumentaste tu suete a: "+pj1.Suerte);
-            break;
-    }
-    if(LargoPalabras <= 7)
-    {
-        LargoPalabras++;
-    }
-    if(cantPalabras <= 10)
-    {
-        cantPalabras++;
+        break;
     }
 }
 

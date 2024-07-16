@@ -33,18 +33,21 @@ namespace clases
         
         public double FuerzaGolpe(int cantGolpes, int cantRondas)
         {
-            double media = (double)cantGolpes/4 - 1 + (double)cantGolpes/4*(Suerte/cantRondas);
-            double S = 100*media;
+
+            double media = (double)cantGolpes/4 + cantGolpes/4*(Suerte/cantRondas);
+            double Maximo = cantGolpes/2;
+            double poli = 4.4*(media/Maximo) - 0.8*Math.Pow(media/Maximo, 2);
+            double S = Math.Exp(poli);
             double b = Math.Exp(media*Math.Log(S));
-            double MaxRand = 1/(Math.Exp(-(cantGolpes/2 - 1)*Math.Log(S)+Math.Log(b))+1);
+            double MaxRand = 1/(Math.Exp(-(cantGolpes/2)*Math.Log(S)+Math.Log(b))+1);
             double numero = randi.NextDouble() * MaxRand;
             
-            return 1 + Math.Abs(Sigmoide_inversa(numero, S, b))*palabrasVel;
+            return Math.Abs(Sigmoide_inversa(numero, S, b, MaxRand))*palabrasVel;
         }
 
-        private double Sigmoide_inversa(double x, double S, double b)       //mapea los valores de una V.A con dist. uniforme a una con distribución aprox. normal
+        private double Sigmoide_inversa(double x, double S, double b, double max)       //mapea los valores de una V.A con dist. uniforme a una con distribución aprox. normal
         {
-            return (Math.Log(b)-Math.Log(1/x - 1))/Math.Log(S);
+            return (Math.Log(b)-Math.Log(max/x - 1))/Math.Log(S);
         }
 
         public void CalcularVelocidad(int TiempoDisponible, int TiempoRestante)
@@ -78,7 +81,7 @@ namespace clases
         public int LadoJugador { get; set; }
         public int CantidadGolpesTotalpj { get; set; }
         public double LadoOtro { get; set; }
-        public bool Cayo { get => cayo; }
+        public bool Cayo { get => cayo; set => cayo = value; }
         public bool Sigue { get; set; }
         
         public void LadoJugadorMetodo(int cantGolpesInicial, int fuerzaPj)
@@ -99,9 +102,6 @@ namespace clases
             if(LadoJugador <= 0)
             {
                 cayo = true;
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("el árbol cayó para TU lado. GANASTE");
-                Console.ForegroundColor = ConsoleColor.White;
             }
         }
 
@@ -112,9 +112,6 @@ namespace clases
             if(LadoOtro <= 0)
             {
                 cayo = true;
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("el árbol cayó para el lado del otro. PERDISTE");
-                Console.ForegroundColor = ConsoleColor.White;
                 Sigue = false;
             }
         }
@@ -178,7 +175,7 @@ namespace clases
         public void IniciarTurnoOtro(int VelocidadOtro)
         {
             Console.WriteLine("es turno del otro:");
-            tiempoOtro = randOtro.Next(tiempoDisponible-VelocidadOtro, tiempoDisponible);
+            tiempoOtro = randOtro.Next(tiempoDisponible-VelocidadOtro*2, tiempoDisponible);
             criticoOtro = false;
             Thread.Sleep(tiempoOtro);
             Console.ForegroundColor = ConsoleColor.DarkGreen;
@@ -186,7 +183,6 @@ namespace clases
             Thread.Sleep(500);
             Console.WriteLine("Ya golpeó");
             Console.ForegroundColor = ConsoleColor.White;
-            Thread.Sleep(400);
             if(tiempoOtro < tiempoDisponible/3)
             {
                 criticoOtro = true;
@@ -233,7 +229,7 @@ namespace clases
     {
         public void GuardarPersonajes(List<Personaje> pers)
         {
-            string ruta = @"C:\Users\Juan\OneDrive\Escritorio\Facultad\3er_anio-1er_cuat\taller_de_lenguajes_I\tl1-proyectofinal2024-Jasimus\personajes.json";
+            string ruta = @".\personajes.json";
             List<string> persS = new List<string>();
             if (!File.Exists(ruta))
             {
@@ -257,7 +253,7 @@ namespace clases
 
         public List<Personaje> ObtenerPersonajes(int cant)
         {
-            string ruta = @"C:\Users\Juan\OneDrive\Escritorio\Facultad\3er_anio-1er_cuat\taller_de_lenguajes_I\tl1-proyectofinal2024-Jasimus\personajes.json";
+            string ruta = @".\personajes.json";
             List<Personaje> lp = new List<Personaje>();
             using (StreamReader reader = new StreamReader(ruta))
             {
