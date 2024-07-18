@@ -7,6 +7,7 @@ Partida partida = new Partida();
 Personaje pj1 = new Personaje();
 Personaje Otro = new Personaje();
 Arbol arbol = new Arbol();
+Stream streamEntrada = Console.OpenStandardInput();
 
 string? mejora;
 string cantRondas;
@@ -35,7 +36,7 @@ do
 switch (tipoLeniador)
 {
     case "fuerte":
-        pj1.Fuerza = 2;
+        pj1.Fuerza = 1;
         pj1.Suerte = 0;
         pj1.Velocidad = 0;
         break;
@@ -66,15 +67,16 @@ while(true)
     }
     else
     {
-        Otro = partida.GenerarOtro();
+        Otro = partida.GenerarOtro(pj1.Fuerza, pj1.Velocidad, pj1.Suerte);
+        PContraPartida.Add(Otro);
     }
 
     if (arbol.Sigue)
     {
-        arbol.LadoJugadorMetodo(cantPalabras, pj1.Fuerza);
-        arbol.LadoContrincante(rondaActual, cantRondasInt, pj1.VelocidadMedia());
+        arbol.LadoJugadorMetodo(cantPalabras);
+        arbol.LadoContrincante();
         // Lenguaje idioma = (Lenguaje)idiomaRandom.Next(0, 4);
-        PalabrasRonda = await partida.PedirPalabras(/*idioma*/Lenguaje.es, cantPalabras, LargoPalabras - pj1.Velocidad, pj1.Client);
+        PalabrasRonda = await partida.PedirPalabras(/*idioma*/Lenguaje.es, partida.CalcularCantidadPalabras(cantPalabras, Otro.Fuerza), LargoPalabras - pj1.Velocidad, pj1.Client);
         int indice = 0;
         pj1.Turno = true;
         arbol.Cayo = false;
@@ -89,7 +91,10 @@ while(true)
                     Thread.Sleep(1000);
                 }
                 Console.WriteLine(PalabrasRonda[indice]);
+
+                streamEntrada.Flush();
                 partida.IniciarTurno();
+
                 if(partida.Escrito && string.Compare(partida.Palabra, PalabrasRonda[indice]) == 0)
                 {
                     Console.ForegroundColor = ConsoleColor.Blue;
@@ -187,6 +192,7 @@ while(true)
             {
                 cantPalabras++;
             }
+            Thread.Sleep(1000);
             Console.Clear();
         }
         else
@@ -199,8 +205,10 @@ while(true)
         break;
     }
 }
+if(PContraPartida.Count != 0)
+{
+    personajesJson.GuardarPersonajes(PContraPartida);
+}
 
 // PruebaConsola p = new PruebaConsola();
-// p.Suerte = 2;
-// p.PalabrasVel = 1;
-// Console.WriteLine(p.Sigmoide_inversa(0.43, 5, 12));
+// p.Run();

@@ -1,5 +1,6 @@
-{"Fuerza":1,"Velocidad":1,"Suerte":1,"Turno":false,"SumaVelocidades":0,"CantPalabrasEscritas":0}
-{"Fuerza":0,"Velocidad":2,"Suerte":0,"Turno":false,"SumaVelocidades":0,"CantPalabrasEscritas":0}
-{"Fuerza":2,"Velocidad":0,"Suerte":0,"Turno":false,"SumaVelocidades":0,"CantPalabrasEscritas":0}
-{"Fuerza":0,"Velocidad":0,"Suerte":2,"Turno":false,"SumaVelocidades":0,"CantPalabrasEscritas":0}
-{"Fuerza":1,"Velocidad":0,"Suerte":1,"Turno":false,"SumaVelocidades":0,"CantPalabrasEscritas":0}
+{"Fuerza":1,"Velocidad":0,"Suerte":1,"Turno":false,"SumaFG":0,"CantPalabrasEscritas":0}
+{"Fuerza":2,"Velocidad":1,"Suerte":0,"Turno":false,"SumaFG":0,"CantPalabrasEscritas":0}
+{"Fuerza":2,"Velocidad":0,"Suerte":2,"Turno":false,"SumaFG":0,"CantPalabrasEscritas":0}
+{"Fuerza":3,"Velocidad":1,"Suerte":2,"Turno":false,"SumaFG":0,"CantPalabrasEscritas":0}
+{"Fuerza":3,"Velocidad":2,"Suerte":1,"Turno":false,"SumaFG":0,"CantPalabrasEscritas":0}
+{"Fuerza":4,"Velocidad":2,"Suerte":3,"Turno":false,"SumaFG":0,"CantPalabrasEscritas":1}

@@ -69,22 +69,26 @@ namespace pruebas;
 // }
 
 class PruebaConsola
-{
-    public int Suerte { get; set; }
-    public double PalabrasVel { get; set; }
-    Random randi = new Random();
-    public double FuerzaGolpe(int cantGolpes, int cantRondas)
-    {
-        double media = (double)cantGolpes/4 - 1 + (double)(cantGolpes/4)*(Suerte/cantRondas);
-        double S = 10*media;
-        double b = Math.Exp(media*Math.Log(S));
-        double MaxRand = 1/(Math.Exp(-((double)cantGolpes/2 - 1)*Math.Log(S)+Math.Log(b))+1);
-        double numero = randi.NextDouble() * MaxRand;
-        
-        return 1 + Math.Abs(Sigmoide_inversa(numero, S, b))*PalabrasVel;
-    }
-    public double Sigmoide_inversa(double x, double S, double b)       //mapea los valores de una V.A con dist. uniforme a una con distribución aprox. normal
-    {
-        return (Math.Log(b)-Math.Log(1/x - 1))/Math.Log(S);
+{   
+    ConsoleKeyInfo chi;
+    bool activo = false;
+    public void Run()
+    {   
+        while(true)
+        {
+            do
+            {
+                Console.WriteLine("presione x para bloquear la entrada");
+                chi = Console.ReadKey(true);
+                Console.WriteLine("presionaste {0}", chi.Key);
+                activo = false;
+            }while(chi.Key != ConsoleKey.X);
+            
+            do
+            {
+                Console.WriteLine("presione z para desbloquear la entrada");
+                chi = Console.ReadKey(true);
+            }while(chi.Key != ConsoleKey.Z);
+        }
     }
 }

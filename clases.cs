@@ -1,48 +1,52 @@
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
+using System.IO;
 
 namespace clases
 {
     public class Personaje
     {
         private Random randi = new Random();
-        private double sumaVel = 0;
+        private double sumaFG = 0;
         private int cantPalabrasEs = 0;
         private double palabrasVel = 0;
-
+        
         public HttpClient Client = new HttpClient();
         public int Fuerza { get; set; }
         public int Velocidad { get; set; }
-        public double Suerte { get; set; }
+        public int Suerte { get; set; }
         public bool Turno { get; set; }
-        public double SumaVelocidades { get => sumaVel; set => sumaVel = value; }
+        public double SumaFG { get => sumaFG; set => sumaFG = value; }
         public int CantPalabrasEscritas { get => cantPalabrasEs; set => cantPalabrasEs = value; }
 
-        public double VelocidadMedia()
+        public double FuerzaGolpeMedia()
         {
             if(cantPalabrasEs == 0)
             {
-                return 0;
+                return 1;
             }
             else
             {
-                return sumaVel/cantPalabrasEs;
+                return sumaFG/cantPalabrasEs;
             }
         }
         
         public double FuerzaGolpe(int cantGolpes, int cantRondas)
         {
 
-            double media = (double)cantGolpes/4 + cantGolpes/4*(Suerte/cantRondas);
+            double media = (double)cantGolpes/4 + (double)cantGolpes/4*(Suerte/cantRondas);
             double Maximo = cantGolpes/2;
             double poli = 4.4*(media/Maximo) - 0.8*Math.Pow(media/Maximo, 2);
             double S = Math.Exp(poli);
             double b = Math.Exp(media*Math.Log(S));
             double MaxRand = 1/(Math.Exp(-(cantGolpes/2)*Math.Log(S)+Math.Log(b))+1);
             double numero = randi.NextDouble() * MaxRand;
-            
-            return Math.Abs(Sigmoide_inversa(numero, S, b, MaxRand))*palabrasVel;
+            double fuerzaG = Math.Abs(Sigmoide_inversa(numero, S, b, MaxRand))*palabrasVel + Fuerza;
+            cantPalabrasEs++;
+            sumaFG += fuerzaG;
+
+            return fuerzaG;
         }
 
         private double Sigmoide_inversa(double x, double S, double b, double max)       //mapea los valores de una V.A con dist. uniforme a una con distribución aprox. normal
@@ -53,8 +57,6 @@ namespace clases
         public void CalcularVelocidad(int TiempoDisponible, int TiempoRestante)
         {
             palabrasVel = (double)TiempoRestante/TiempoDisponible;
-            sumaVel += palabrasVel;
-            cantPalabrasEs++;
         }
 
         public void AumentarFuerza()
@@ -69,7 +71,7 @@ namespace clases
 
         public void AumentarSuerte()
         {
-            Suerte ++;
+            Suerte++;
         }
 
     }
@@ -84,15 +86,15 @@ namespace clases
         public bool Cayo { get => cayo; set => cayo = value; }
         public bool Sigue { get; set; }
         
-        public void LadoJugadorMetodo(int cantGolpesInicial, int fuerzaPj)
+        public void LadoJugadorMetodo(int cantGolpesInicial)
         {
-            CantidadGolpesTotalpj = cantGolpesInicial - fuerzaPj;
+            CantidadGolpesTotalpj = cantGolpesInicial;
             LadoJugador = CantidadGolpesTotalpj;
         }
 
-        public void LadoContrincante(int Nronda, int CantRondas, double VelocidadMediaPj)
+        public void LadoContrincante()
         {
-            LadoOtro = CantidadGolpesTotalpj - 1 - Nronda/CantRondas * (CantidadGolpesTotalpj - 3) * VelocidadMediaPj;
+            LadoOtro = CantidadGolpesTotalpj;
         }
 
         public void GolpeJugador(double fuerzaGolpe)
@@ -137,16 +139,17 @@ namespace clases
         public bool Escrito { get => escrito; }
         public bool CriticoOtro { get => criticoOtro; }
 
-        static Thread MainThread = Thread.CurrentThread;
         static TimerCallback callback = new TimerCallback(esperarPalabra);
         static Stopwatch reloj = new Stopwatch();
+        static Thread MainThread = null;
 
         public void IniciarTurno()
         {
+            Timer timer = new Timer(callback, null, 0, Timeout.Infinite);
             try
             {
+                MainThread = Thread.CurrentThread;
                 critico = false;
-                Timer timer = new Timer(callback, null, 0, Timeout.Infinite);
                 Console.WriteLine("> ");
                 reloj.Start();
                 Thread.Sleep(tiempoDisponible);
@@ -157,6 +160,7 @@ namespace clases
             }
             catch(ThreadInterruptedException)
             {
+                timer.Dispose();
                 reloj.Stop();
                 escrito = true;
                 if(reloj.ElapsedMilliseconds <= tiempoDisponible/3)
@@ -191,6 +195,10 @@ namespace clases
 
         private static void esperarPalabra(object state)
         {
+            while(Console.KeyAvailable)
+            {
+                Console.ReadKey(true);
+            }
             palabra = Console.ReadLine();
             MainThread.Interrupt();
             byte[] bytes = Encoding.Default.GetBytes(palabra);
@@ -209,13 +217,25 @@ namespace clases
             return palabras;
         }
 
-        public Personaje GenerarOtro()
+        public int CalcularCantidadPalabras(int cantPalabras, int fuerzaOtro)
+        {
+            if(fuerzaOtro == 0)
+            {
+                return 20;
+            }
+            else
+            {
+                return cantPalabras/fuerzaOtro + 1;
+            }
+        }
+
+        public Personaje GenerarOtro(int fuerzaPj, int velocidadPj, int suertePj)
         {
             Personaje p = new Personaje();
             Random rand = new Random();
-            int fuerza = rand.Next(0, 3);
-            int velocidad = rand.Next(0, 3);
-            int suerte = rand.Next(0, 3);
+            int fuerza = rand.Next(0, 2) + fuerzaPj;
+            int velocidad = rand.Next(0, 2) + velocidadPj;
+            int suerte = rand.Next(0, 2) + suertePj;
 
             p.Fuerza = fuerza;
             p.Velocidad = velocidad;
