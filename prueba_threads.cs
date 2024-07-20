@@ -1,5 +1,5 @@
 using System.IO;
-using System.Runtime.Intrinsics.Arm;
+using System.Threading.Tasks;
 using System.Text;
 using Microsoft.VisualBasic;
 // using System.Diagnostics;
@@ -69,26 +69,71 @@ namespace pruebas;
 // }
 
 class PruebaConsola
-{   
-    ConsoleKeyInfo chi;
-    bool activo = false;
+{  
+    // public string userInput = string.Empty;
+    // public bool Escribir { get => escribir; set => escribir = value; }
+    
+    // private static Thread nuevoThread = new Thread(esperarPalabra);
+    // private static bool escribir = true;
+    // private static Thread MainThread = null;
+    // // private static CancellationTokenSource cts = new CancellationTokenSource();
+    // // CancellationToken token = cts.Token;
+    // private static string input = "";
+
     public void Run()
-    {   
-        while(true)
-        {
-            do
+    {
+    //     nuevoThread.Start();
+    //     MainThread = Thread.CurrentThread;
+    //     try
+    //     {
+    //         Console.WriteLine("ingrese una palabra: ");
+    //         Thread.Sleep(4000);
+    //         escribir = false;
+    //     }
+    //     catch(ThreadInterruptedException)
+    //     {
+    //         userInput = input;
+    //         Console.WriteLine(userInput);
+    //     }
+    // }
+
+    // public static void esperarPalabra()
+    // {
+    //     try
+    //     {
+    //         while (escribir)
+    //         {
+    //             if (Console.KeyAvailable)
+    //             {
+    //                 ConsoleKeyInfo key = Console.ReadKey();
+    //                 if (key.Key == ConsoleKey.Enter)
+    //                 {
+    //                     MainThread.Interrupt();
+    //                     break;
+    //                 }
+
+    //                 input += key.KeyChar;
+    //             }
+    //         }
+    //         if(!escribir)
+    //         {
+    //             Console.WriteLine("no se ingresó nada");
+    //         }
+    //     }
+    //     catch(ThreadInterruptedException)
+    //     {
+    //     }
+       while (true)
             {
-                Console.WriteLine("presione x para bloquear la entrada");
-                chi = Console.ReadKey(true);
-                Console.WriteLine("presionaste {0}", chi.Key);
-                activo = false;
-            }while(chi.Key != ConsoleKey.X);
-            
-            do
-            {
-                Console.WriteLine("presione z para desbloquear la entrada");
-                chi = Console.ReadKey(true);
-            }while(chi.Key != ConsoleKey.Z);
-        }
+                if (Console.KeyAvailable)
+                {
+                    ConsoleKeyInfo key = Console.ReadKey();
+                    Console.Write((int)key.Key);
+                    if(key.Key.Equals((char)0))
+                    {
+                        Console.SetCursorPosition(Console.CursorLeft - 2, Console.CursorTop);
+                    }
+                }
+            }
     }
 }

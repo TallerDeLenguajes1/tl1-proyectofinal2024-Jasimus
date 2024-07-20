@@ -10,7 +10,7 @@ namespace clases
         private Random randi = new Random();
         private double sumaFG = 0;
         private int cantPalabrasEs = 0;
-        private double palabrasVel = 0;
+        private double palabrasVel = 1;
         
         public HttpClient Client = new HttpClient();
         public int Fuerza { get; set; }
@@ -124,11 +124,13 @@ namespace clases
     {
         private static int tiempoDisponible = 5000;
         private static bool critico = false;
+        
         private static bool escrito = false;
         private static string? palabra = string.Empty;
         private static int tiempoOtro;
         private static Random randOtro = new Random();
         private static bool criticoOtro = false;
+        private static bool escribir = true;
 
         public int Nronda { get; set; }
         public int CantRondas { get; set; }
@@ -139,30 +141,41 @@ namespace clases
         public bool Escrito { get => escrito; }
         public bool CriticoOtro { get => criticoOtro; }
 
-        static TimerCallback callback = new TimerCallback(esperarPalabra);
         static Stopwatch reloj = new Stopwatch();
-        static Thread MainThread = null;
+        static Thread MainThread = Thread.CurrentThread;
+        static Object lockObject = new Object();
 
         public void IniciarTurno()
         {
-            Timer timer = new Timer(callback, null, 0, Timeout.Infinite);
             try
             {
                 MainThread = Thread.CurrentThread;
+                Thread nuevoThread = new Thread(esperarPalabra);
+                while(Console.KeyAvailable)
+                {
+                    Console.ReadKey(true);
+                }
+                Console.Write("> ");
                 critico = false;
-                Console.WriteLine("> ");
+                escribir = true;
+                nuevoThread.Start();
                 reloj.Start();
                 Thread.Sleep(tiempoDisponible);
+                escribir = false;
                 reloj.Reset();
-                timer.Dispose();
-                escrito = false;
-                Console.WriteLine("perdiste tu turno");
+                lock(lockObject)
+                {
+                    escrito = false;
+                }
+                Console.WriteLine("\nperdiste tu turno");
             }
             catch(ThreadInterruptedException)
             {
-                timer.Dispose();
+                lock (lockObject)
+                {
+                    escrito = true;
+                }
                 reloj.Stop();
-                escrito = true;
                 if(reloj.ElapsedMilliseconds <= tiempoDisponible/3)
                 {
                     critico = true;
@@ -174,6 +187,48 @@ namespace clases
                 }
                 reloj.Reset();
             }
+        }
+
+        private static void esperarPalabra()
+        {
+            string input = "";
+            while (escribir)
+            {
+                if (Console.KeyAvailable)
+                {
+                    ConsoleKeyInfo key = Console.ReadKey();
+                    if (key.Key == ConsoleKey.Enter)
+                    {
+                        reloj.Stop();
+                        MainThread.Interrupt();
+                        Console.WriteLine();
+                        break;
+                    }
+
+                    if(key.Key == ConsoleKey.Backspace)
+                    {
+                        if(input.Length > 0)
+                        {
+                            input = input.Substring(0, input.Length - 1);
+                            Console.Write(" ");
+                            Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+                        }
+                    }
+                    else
+                    {
+                        if(key.KeyChar != (char)0)
+                        {
+                            input += key.KeyChar;
+                        }
+                        else
+                        {
+                            Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+                        }
+                    }
+                }
+            }
+
+            palabra = input;
         }
 
         public void IniciarTurnoOtro(int VelocidadOtro)
@@ -191,18 +246,6 @@ namespace clases
             {
                 criticoOtro = true;
             }
-        }
-
-        private static void esperarPalabra(object state)
-        {
-            while(Console.KeyAvailable)
-            {
-                Console.ReadKey(true);
-            }
-            palabra = Console.ReadLine();
-            MainThread.Interrupt();
-            byte[] bytes = Encoding.Default.GetBytes(palabra);
-            palabra = Encoding.UTF8.GetString(bytes);
         }
 
         public async Task<List<string>> PedirPalabras(Lenguaje idio, int cantidad, int largo, HttpClient client)
@@ -299,8 +342,8 @@ namespace clases
     public enum Lenguaje
     {
         es,
-        de,
         fr,
-        it
+        it,
+        de
     }
 }

@@ -41,13 +41,13 @@ switch (tipoLeniador)
         pj1.Velocidad = 0;
         break;
 
-    case "habil":
+    case "hábil":
         pj1.Fuerza = 0;
         pj1.Suerte = 2;
         pj1.Velocidad = 0;
         break;
     
-    case "agil":
+    case "ágil":
         pj1.Fuerza = 0;
         pj1.Suerte = 0;
         pj1.Velocidad = 2;
@@ -75,8 +75,9 @@ while(true)
     {
         arbol.LadoJugadorMetodo(cantPalabras);
         arbol.LadoContrincante();
-        // Lenguaje idioma = (Lenguaje)idiomaRandom.Next(0, 4);
-        PalabrasRonda = await partida.PedirPalabras(/*idioma*/Lenguaje.es, partida.CalcularCantidadPalabras(cantPalabras, Otro.Fuerza), LargoPalabras - pj1.Velocidad, pj1.Client);
+        Lenguaje idioma = (Lenguaje)idiomaRandom.Next(0, 3);
+        PalabrasRonda = await partida.PedirPalabras(idioma/*Lenguaje.es*/, partida.CalcularCantidadPalabras(cantPalabras, Otro.Fuerza), LargoPalabras - pj1.Velocidad, pj1.Client);
+        // PalabrasRonda = ["migraña", "salúd", "Amén", "año", "drácula", "mañana", "sin duda", "cuál año", "dea", "el chuqui", "dabo", "el chocas", "el rubius", "y así"];
         int indice = 0;
         pj1.Turno = true;
         arbol.Cayo = false;
@@ -94,19 +95,28 @@ while(true)
 
                 streamEntrada.Flush();
                 partida.IniciarTurno();
+                if(partida.Escrito)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("Achazo");
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
 
                 if(partida.Escrito && string.Compare(partida.Palabra, PalabrasRonda[indice]) == 0)
                 {
-                    Console.ForegroundColor = ConsoleColor.Blue;
-                    Console.WriteLine("GOLPE!");
-                    Console.ForegroundColor = ConsoleColor.White;
-                    pj1.CalcularVelocidad(partida.TiempoDisponible, partida.TiempoRestante);
                     fuerzaGolpe = pj1.FuerzaGolpe(arbol.CantidadGolpesTotalpj, cantRondasInt);
+                    pj1.CalcularVelocidad(partida.TiempoDisponible, partida.TiempoRestante);
                     arbol.GolpeJugador(fuerzaGolpe);
                     if(partida.Critico)
                     {
                         Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.WriteLine("crítico: "+fuerzaGolpe);
+                        Console.ForegroundColor = ConsoleColor.White;
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.Blue;
+                        Console.WriteLine("GOLPE: "+fuerzaGolpe);
                         Console.ForegroundColor = ConsoleColor.White;
                     }
                 }
