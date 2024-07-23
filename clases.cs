@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Text;
 using System.Text.Json;
 
 namespace clases
@@ -9,40 +8,37 @@ namespace clases
         private Random randi = new Random();
         private double sumaVel = 0;
         private int cantPalabrasEs = 0;
-        private double palabrasVel = 0;
+        private double palabrasVel = 1;
+        private double coefImportancia = 1;
 
         public HttpClient Client = new HttpClient();
         public int Fuerza { get; set; }
         public int Velocidad { get; set; }
-        public double Suerte { get; set; }
+        public int Suerte { get; set; }
         public bool Turno { get; set; }
-        public double SumaVelocidades { get => sumaVel; set => sumaVel = value; }
+        public double PalabrasVel { get => palabrasVel; }
+        public double SumaVel { get => sumaVel; set => sumaVel = value; }
         public int CantPalabrasEscritas { get => cantPalabrasEs; set => cantPalabrasEs = value; }
+        public double CoefImportancia { get => coefImportancia; set => coefImportancia = value; }                                   //solo para el contrincante
 
         public double VelocidadMedia()
         {
-            if(cantPalabrasEs == 0)
-            {
-                return 0;
-            }
-            else
-            {
-                return sumaVel/cantPalabrasEs;
-            }
+            return sumaVel/cantPalabrasEs;
         }
         
         public double FuerzaGolpe(int cantGolpes, int cantRondas)
         {
 
-            double media = (double)cantGolpes/4 + cantGolpes/4*(Suerte/cantRondas);
+            double media = (double)cantGolpes/4 + (double)cantGolpes/4*(Suerte/cantRondas);
             double Maximo = cantGolpes/2;
             double poli = 4.4*(media/Maximo) - 0.8*Math.Pow(media/Maximo, 2);
             double S = Math.Exp(poli);
             double b = Math.Exp(media*Math.Log(S));
             double MaxRand = 1/(Math.Exp(-(cantGolpes/2)*Math.Log(S)+Math.Log(b))+1);
             double numero = randi.NextDouble() * MaxRand;
-            
-            return Math.Abs(Sigmoide_inversa(numero, S, b, MaxRand))*palabrasVel;
+            double fuerzaG = Math.Abs(Sigmoide_inversa(numero, S, b, MaxRand))*palabrasVel + Fuerza;
+
+            return fuerzaG;
         }
 
         private double Sigmoide_inversa(double x, double S, double b, double max)       //mapea los valores de una V.A con dist. uniforme a una con distribución aprox. normal
@@ -54,7 +50,6 @@ namespace clases
         {
             palabrasVel = (double)TiempoRestante/TiempoDisponible;
             sumaVel += palabrasVel;
-            cantPalabrasEs++;
         }
 
         public void AumentarFuerza()
@@ -69,7 +64,7 @@ namespace clases
 
         public void AumentarSuerte()
         {
-            Suerte ++;
+            Suerte++;
         }
 
     }
@@ -78,26 +73,26 @@ namespace clases
     {
         private bool cayo = false;
 
-        public int LadoJugador { get; set; }
+        public double LadoJugador { get; set; }
         public int CantidadGolpesTotalpj { get; set; }
         public double LadoOtro { get; set; }
         public bool Cayo { get => cayo; set => cayo = value; }
         public bool Sigue { get; set; }
         
-        public void LadoJugadorMetodo(int cantGolpesInicial, int fuerzaPj)
+        public void LadoJugadorMetodo(int cantGolpesInicial)
         {
-            CantidadGolpesTotalpj = cantGolpesInicial - fuerzaPj;
+            CantidadGolpesTotalpj = cantGolpesInicial;
             LadoJugador = CantidadGolpesTotalpj;
         }
 
-        public void LadoContrincante(int Nronda, int CantRondas, double VelocidadMediaPj)
+        public void LadoContrincante()
         {
-            LadoOtro = CantidadGolpesTotalpj - 1 - Nronda/CantRondas * (CantidadGolpesTotalpj - 3) * VelocidadMediaPj;
+            LadoOtro = CantidadGolpesTotalpj;
         }
 
         public void GolpeJugador(double fuerzaGolpe)
         {
-            LadoJugador -=(int) Math.Round(fuerzaGolpe);
+            LadoJugador -= fuerzaGolpe;
 
             if(LadoJugador <= 0)
             {
@@ -107,7 +102,7 @@ namespace clases
 
         public void GolpeContrincante(double fuerzaGolpeOtro)
         {
-            LadoOtro -= (int) Math.Round(fuerzaGolpeOtro);
+            LadoOtro -= fuerzaGolpeOtro;
 
             if(LadoOtro <= 0)
             {
@@ -122,11 +117,14 @@ namespace clases
     {
         private static int tiempoDisponible = 5000;
         private static bool critico = false;
+        
         private static bool escrito = false;
+        private static bool golpeOtro = false;
         private static string? palabra = string.Empty;
-        private static int tiempoOtro;
+        private static double tiempoOtro;
         private static Random randOtro = new Random();
         private static bool criticoOtro = false;
+        private static bool escribir = true;
 
         public int Nronda { get; set; }
         public int CantRondas { get; set; }
@@ -135,30 +133,45 @@ namespace clases
         public string? Palabra { get => palabra; }
         public bool Critico { get => critico; }
         public bool Escrito { get => escrito; }
+        public bool GolpeOtro { get => golpeOtro; }
         public bool CriticoOtro { get => criticoOtro; }
 
-        static Thread MainThread = Thread.CurrentThread;
-        static TimerCallback callback = new TimerCallback(esperarPalabra);
         static Stopwatch reloj = new Stopwatch();
+        static Thread MainThread = Thread.CurrentThread;
+        static Object lockObject = new Object();
 
-        public void IniciarTurno()
+        public void IniciarTurno(Personaje pers)
         {
             try
             {
+                MainThread = Thread.CurrentThread;
+                Thread nuevoThread = new Thread(esperarPalabra);
+                while(Console.KeyAvailable)
+                {
+                    Console.ReadKey(true);
+                }
+                Console.Write("> ");
                 critico = false;
-                Timer timer = new Timer(callback, null, 0, Timeout.Infinite);
-                Console.WriteLine("> ");
+                escribir = true;
+                nuevoThread.Start();
                 reloj.Start();
                 Thread.Sleep(tiempoDisponible);
+                escribir = false;
                 reloj.Reset();
-                timer.Dispose();
-                escrito = false;
-                Console.WriteLine("perdiste tu turno");
+                lock(lockObject)
+                {
+                    escrito = false;
+                }
+                Console.WriteLine("\nperdiste tu turno");
             }
             catch(ThreadInterruptedException)
             {
+                lock (lockObject)
+                {
+                    escrito = true;
+                }
+                pers.CantPalabrasEscritas++;
                 reloj.Stop();
-                escrito = true;
                 if(reloj.ElapsedMilliseconds <= tiempoDisponible/3)
                 {
                     critico = true;
@@ -172,29 +185,74 @@ namespace clases
             }
         }
 
-        public void IniciarTurnoOtro(int VelocidadOtro)
+        private static void esperarPalabra()
+        {
+            string input = "";
+            while (escribir)
+            {
+                if (Console.KeyAvailable)
+                {
+                    ConsoleKeyInfo key = Console.ReadKey();
+                    if (key.Key == ConsoleKey.Enter)
+                    {
+                        reloj.Stop();
+                        MainThread.Interrupt();
+                        Console.WriteLine();
+                        break;
+                    }
+
+                    if(key.Key == ConsoleKey.Backspace)
+                    {
+                        if(input.Length > 0)
+                        {
+                            input = input.Substring(0, input.Length - 1);
+                            Console.Write(" ");
+                            Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+                        }
+                    }
+                    else
+                    {
+                        if(key.KeyChar != (char)0)
+                        {
+                            input += key.KeyChar;
+                        }
+                        else
+                        {
+                            Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+                        }
+                    }
+                }
+            }
+
+            palabra = input;
+        }
+
+        public void IniciarTurnoOtro(double VelociadMedia, double CoefImp)
         {
             Console.WriteLine("es turno del otro:");
-            tiempoOtro = randOtro.Next(tiempoDisponible-VelocidadOtro*2, tiempoDisponible);
+            double randO = randOtro.NextDouble();
+            tiempoOtro = tiempoDisponible/3*(1-VelociadMedia*CoefImp + randO*(5-2*VelociadMedia*CoefImp));
             criticoOtro = false;
-            Thread.Sleep(tiempoOtro);
-            Console.ForegroundColor = ConsoleColor.DarkGreen;
-            Console.WriteLine(@"\ /"+"\n"+@"/ \");
-            Thread.Sleep(500);
-            Console.WriteLine("Ya golpeó");
+            golpeOtro = false;
+            Thread.Sleep(3000);
+            if(tiempoOtro <= tiempoDisponible)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGreen;
+                Console.WriteLine(@"\ /"+"\n"+@"/ \");
+                Thread.Sleep(500);
+                Console.WriteLine("golpeó");
+                golpeOtro = true;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write("FALLO");
+            }
             Console.ForegroundColor = ConsoleColor.White;
             if(tiempoOtro < tiempoDisponible/3)
             {
                 criticoOtro = true;
             }
-        }
-
-        private static void esperarPalabra(object state)
-        {
-            palabra = Console.ReadLine();
-            MainThread.Interrupt();
-            byte[] bytes = Encoding.Default.GetBytes(palabra);
-            palabra = Encoding.UTF8.GetString(bytes);
         }
 
         public async Task<List<string>> PedirPalabras(Lenguaje idio, int cantidad, int largo, HttpClient client)
@@ -209,17 +267,18 @@ namespace clases
             return palabras;
         }
 
-        public Personaje GenerarOtro()
+        public Personaje GenerarOtro(int fuerzaPj, int velocidadPj, int suertePj)
         {
             Personaje p = new Personaje();
             Random rand = new Random();
-            int fuerza = rand.Next(0, 3);
-            int velocidad = rand.Next(0, 3);
-            int suerte = rand.Next(0, 3);
+            int fuerza = rand.Next(0, 2) + fuerzaPj;
+            int velocidad = rand.Next(0, 2) + velocidadPj;
+            int suerte = rand.Next(0, 2) + suertePj;
 
             p.Fuerza = fuerza;
             p.Velocidad = velocidad;
             p.Suerte = suerte;
+            p.CoefImportancia = Math.Tanh(0.4*suertePj);
 
             return p;
         }
@@ -274,13 +333,51 @@ namespace clases
             return lp;
         }
 
+        public void GuardadJugador(Personaje pj, string alias, string tipo, int rondasJugadas)
+        {
+            string url = "./historialJugador.json";
+            InfoJugador infoJ = new InfoJugador();
+
+            infoJ.Alias = alias;
+            infoJ.Tipo = tipo;
+            infoJ.Fuerza = pj.Fuerza;
+            infoJ.Velocidad = pj.Velocidad;
+            infoJ.Suerte = pj.Suerte;
+            infoJ.VelociadMedia = pj.VelocidadMedia();
+            infoJ.CantPalabrasEscritas = pj.CantPalabrasEscritas;
+            infoJ.RondasJugadas = rondasJugadas;
+
+            string infoJson = JsonSerializer.Serialize(infoJ);
+
+            if(!File.Exists(url))
+            {
+                File.WriteAllText(url, infoJson+"\n");
+            }
+            else
+            {
+                File.AppendAllText(url, infoJson+"\n");
+            }
+        }
+    }
+
+
+    public class InfoJugador
+    {
+        public string? Alias { get; set; }
+        public string Tipo { get; set; }
+        public int Fuerza { get; set; }
+        public int Velocidad { get; set; }
+        public int Suerte { get; set; }
+        public double VelociadMedia { get; set; }
+        public int CantPalabrasEscritas { get; set; }
+        public int RondasJugadas { get; set; }
     }
 
     public enum Lenguaje
     {
         es,
-        de,
         fr,
-        it
+        it,
+        de
     }
 }

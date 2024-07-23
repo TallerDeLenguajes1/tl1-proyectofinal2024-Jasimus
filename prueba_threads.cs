@@ -1,5 +1,5 @@
 using System.IO;
-using System.Runtime.Intrinsics.Arm;
+using System.Threading.Tasks;
 using System.Text;
 using Microsoft.VisualBasic;
 // using System.Diagnostics;
@@ -69,22 +69,71 @@ namespace pruebas;
 // }
 
 class PruebaConsola
-{
-    public int Suerte { get; set; }
-    public double PalabrasVel { get; set; }
-    Random randi = new Random();
-    public double FuerzaGolpe(int cantGolpes, int cantRondas)
+{  
+    // public string userInput = string.Empty;
+    // public bool Escribir { get => escribir; set => escribir = value; }
+    
+    // private static Thread nuevoThread = new Thread(esperarPalabra);
+    // private static bool escribir = true;
+    // private static Thread MainThread = null;
+    // // private static CancellationTokenSource cts = new CancellationTokenSource();
+    // // CancellationToken token = cts.Token;
+    // private static string input = "";
+
+    public void Run()
     {
-        double media = (double)cantGolpes/4 - 1 + (double)(cantGolpes/4)*(Suerte/cantRondas);
-        double S = 10*media;
-        double b = Math.Exp(media*Math.Log(S));
-        double MaxRand = 1/(Math.Exp(-((double)cantGolpes/2 - 1)*Math.Log(S)+Math.Log(b))+1);
-        double numero = randi.NextDouble() * MaxRand;
-        
-        return 1 + Math.Abs(Sigmoide_inversa(numero, S, b))*PalabrasVel;
-    }
-    public double Sigmoide_inversa(double x, double S, double b)       //mapea los valores de una V.A con dist. uniforme a una con distribución aprox. normal
-    {
-        return (Math.Log(b)-Math.Log(1/x - 1))/Math.Log(S);
+    //     nuevoThread.Start();
+    //     MainThread = Thread.CurrentThread;
+    //     try
+    //     {
+    //         Console.WriteLine("ingrese una palabra: ");
+    //         Thread.Sleep(4000);
+    //         escribir = false;
+    //     }
+    //     catch(ThreadInterruptedException)
+    //     {
+    //         userInput = input;
+    //         Console.WriteLine(userInput);
+    //     }
+    // }
+
+    // public static void esperarPalabra()
+    // {
+    //     try
+    //     {
+    //         while (escribir)
+    //         {
+    //             if (Console.KeyAvailable)
+    //             {
+    //                 ConsoleKeyInfo key = Console.ReadKey();
+    //                 if (key.Key == ConsoleKey.Enter)
+    //                 {
+    //                     MainThread.Interrupt();
+    //                     break;
+    //                 }
+
+    //                 input += key.KeyChar;
+    //             }
+    //         }
+    //         if(!escribir)
+    //         {
+    //             Console.WriteLine("no se ingresó nada");
+    //         }
+    //     }
+    //     catch(ThreadInterruptedException)
+    //     {
+    //     }
+       while (true)
+            {
+                if (Console.KeyAvailable)
+                {
+                    ConsoleKeyInfo key = Console.ReadKey();
+                    Console.Write((int)key.Key);
+                    if(key.Key.Equals((char)0))
+                    {
+                        Console.SetCursorPosition(Console.CursorLeft - 2, Console.CursorTop);
+                    }
+                }
+            }
     }
 }

@@ -7,8 +7,10 @@ Partida partida = new Partida();
 Personaje pj1 = new Personaje();
 Personaje Otro = new Personaje();
 Arbol arbol = new Arbol();
+Stream streamEntrada = Console.OpenStandardInput();
+string alias;
 
-string? mejora;
+string mejora;
 string cantRondas;
 string tipoLeniador;
 int cantRondasInt;
@@ -22,9 +24,15 @@ Random idiomaRandom = new Random();
 Console.Clear();
 do
 {
-    Console.WriteLine("ingrese la cantidad de rondas (mayor a cero): ");
+    Console.Write("ingrese la cantidad de rondas (mayor a cero): ");
     cantRondas = Console.ReadLine();
 }while(!int.TryParse(cantRondas, out cantRondasInt) && cantRondasInt <= 0);
+
+do
+{
+    Console.Write("ingrese el alias de su leñador: ");
+    alias = Console.ReadLine();
+}while(alias == string.Empty);
 
 do
 {
@@ -35,18 +43,18 @@ do
 switch (tipoLeniador)
 {
     case "fuerte":
-        pj1.Fuerza = 2;
+        pj1.Fuerza = 1;
         pj1.Suerte = 0;
         pj1.Velocidad = 0;
         break;
 
-    case "habil":
+    case "hábil":
         pj1.Fuerza = 0;
         pj1.Suerte = 2;
         pj1.Velocidad = 0;
         break;
     
-    case "agil":
+    case "ágil":
         pj1.Fuerza = 0;
         pj1.Suerte = 0;
         pj1.Velocidad = 2;
@@ -55,7 +63,7 @@ switch (tipoLeniador)
 Console.Clear();
 arbol.Sigue = true;
 PersonajesJson personajesJson = new PersonajesJson();
-List<Personaje> PContra = personajesJson.ObtenerPersonajes(cantRondasInt);
+List<Personaje> PContra = personajesJson.ObtenerPersonajes(1);
 List<Personaje> PContraPartida = new List<Personaje>();
 
 while(true)
@@ -66,15 +74,17 @@ while(true)
     }
     else
     {
-        Otro = partida.GenerarOtro();
+        Otro = partida.GenerarOtro(pj1.Fuerza, pj1.Velocidad, pj1.Suerte);
+        PContraPartida.Add(Otro);
     }
 
     if (arbol.Sigue)
     {
-        arbol.LadoJugadorMetodo(cantPalabras, pj1.Fuerza);
-        arbol.LadoContrincante(rondaActual, cantRondasInt, pj1.VelocidadMedia());
-        // Lenguaje idioma = (Lenguaje)idiomaRandom.Next(0, 4);
-        PalabrasRonda = await partida.PedirPalabras(/*idioma*/Lenguaje.es, cantPalabras, LargoPalabras - pj1.Velocidad, pj1.Client);
+        arbol.LadoJugadorMetodo(cantPalabras);
+        arbol.LadoContrincante();
+        Lenguaje idioma = (Lenguaje)idiomaRandom.Next(0, 3);
+        PalabrasRonda = await partida.PedirPalabras(idioma/*Lenguaje.es*/, 20, LargoPalabras - pj1.Velocidad, pj1.Client);
+        // PalabrasRonda = ["a", "s", "d", "f", " ", "mañana", "sin duda", "cuál año", "dea", "el chuqui", "dabo", "el chocas", "el rubius", "y así"];
         int indice = 0;
         pj1.Turno = true;
         arbol.Cayo = false;
@@ -89,19 +99,33 @@ while(true)
                     Thread.Sleep(1000);
                 }
                 Console.WriteLine(PalabrasRonda[indice]);
-                partida.IniciarTurno();
+
+                streamEntrada.Flush();
+                partida.IniciarTurno(pj1);
+                if(partida.Escrito)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("Achazo");
+                    Console.WriteLine("cant palabras escritas: "+pj1.CantPalabrasEscritas);
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
+
                 if(partida.Escrito && string.Compare(partida.Palabra, PalabrasRonda[indice]) == 0)
                 {
-                    Console.ForegroundColor = ConsoleColor.Blue;
-                    Console.WriteLine("GOLPE!");
-                    Console.ForegroundColor = ConsoleColor.White;
-                    pj1.CalcularVelocidad(partida.TiempoDisponible, partida.TiempoRestante);
                     fuerzaGolpe = pj1.FuerzaGolpe(arbol.CantidadGolpesTotalpj, cantRondasInt);
+                    pj1.CalcularVelocidad(partida.TiempoDisponible, partida.TiempoRestante);
+                    Console.WriteLine(pj1.PalabrasVel);
                     arbol.GolpeJugador(fuerzaGolpe);
                     if(partida.Critico)
                     {
                         Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.WriteLine("crítico: "+fuerzaGolpe);
+                        Console.ForegroundColor = ConsoleColor.White;
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.Blue;
+                        Console.WriteLine("GOLPE: "+fuerzaGolpe);
                         Console.ForegroundColor = ConsoleColor.White;
                     }
                 }
@@ -114,17 +138,24 @@ while(true)
                 Thread.Sleep(1000);
                 pj1.Turno = false;
                 indice++;
+                if(indice > PalabrasRonda.Count - 1)
+                {
+                    indice = 0;
+                }
             }
             else
             {
-                partida.IniciarTurnoOtro(Otro.Velocidad);
-                double fuerzaGolpeOtro = Otro.FuerzaGolpe(arbol.CantidadGolpesTotalpj, cantRondasInt);
-                arbol.GolpeContrincante(fuerzaGolpeOtro);
-                if(partida.CriticoOtro)
+                partida.IniciarTurnoOtro(pj1.VelocidadMedia(), Otro.CoefImportancia);
+                if(partida.GolpeOtro)
                 {
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.WriteLine("hizo crítico: "+fuerzaGolpeOtro);
-                        Console.ForegroundColor = ConsoleColor.White;
+                    double fuerzaGolpeOtro = Otro.FuerzaGolpe(arbol.CantidadGolpesTotalpj, cantRondasInt);
+                    arbol.GolpeContrincante(fuerzaGolpeOtro);
+                    if(partida.CriticoOtro)
+                    {
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            Console.WriteLine("hizo crítico: "+fuerzaGolpeOtro);
+                            Console.ForegroundColor = ConsoleColor.White;
+                    }
                 }
                 Thread.Sleep(1000);
                 pj1.Turno = true;
@@ -187,6 +218,7 @@ while(true)
             {
                 cantPalabras++;
             }
+            Thread.Sleep(1000);
             Console.Clear();
         }
         else
@@ -200,7 +232,12 @@ while(true)
     }
 }
 
+personajesJson.GuardadJugador(pj1, alias, tipoLeniador, rondaActual-1);
+
+if(PContraPartida.Count != 0)
+{
+    personajesJson.GuardarPersonajes(PContraPartida);
+}
+
 // PruebaConsola p = new PruebaConsola();
-// p.Suerte = 2;
-// p.PalabrasVel = 1;
-// Console.WriteLine(p.Sigmoide_inversa(0.43, 5, 12));
+// p.Run();
