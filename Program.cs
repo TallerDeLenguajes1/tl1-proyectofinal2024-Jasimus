@@ -18,6 +18,7 @@ int rondaActual = 1;
 int cantPalabras = 5;
 int LargoPalabras = 3;
 double fuerzaGolpe;
+bool sePudoAumentar = false;
 
 List<string> PalabrasRonda = new List<string>();
 Random idiomaRandom = new Random();
@@ -102,6 +103,7 @@ while(true)
 
                 streamEntrada.Flush();
                 partida.IniciarTurno(pj1);
+                pj1.CalcularVelocidad(partida.TiempoDisponible, partida.TiempoRestante);
                 if(partida.Escrito)
                 {
                     Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -113,8 +115,6 @@ while(true)
                 if(partida.Escrito && string.Compare(partida.Palabra, PalabrasRonda[indice]) == 0)
                 {
                     fuerzaGolpe = pj1.FuerzaGolpe(arbol.CantidadGolpesTotalpj, cantRondasInt);
-                    pj1.CalcularVelocidad(partida.TiempoDisponible, partida.TiempoRestante);
-                    Console.WriteLine(pj1.PalabrasVel);
                     arbol.GolpeJugador(fuerzaGolpe);
                     if(partida.Critico)
                     {
@@ -146,6 +146,7 @@ while(true)
             else
             {
                 partida.IniciarTurnoOtro(pj1.VelocidadMedia(), Otro.CoefImportancia);
+                Otro.CalcularVelocidad(partida.TiempoDisponible, partida.TiempoRestanteOtro);
                 if(partida.GolpeOtro)
                 {
                     double fuerzaGolpeOtro = Otro.FuerzaGolpe(arbol.CantidadGolpesTotalpj, cantRondasInt);
@@ -190,26 +191,6 @@ while(true)
             Console.WriteLine("Pasas a la siguiente ronda");
             Thread.Sleep(2000);
             Console.Clear();
-            do
-            {
-                Console.WriteLine("¿Qué deseas mejorar?\nFuerza\nVelocidad\nSuerte");
-                mejora =Console.ReadLine();
-            }while(string.Compare(mejora, "Fuerza") != 0 && string.Compare(mejora, "Velocidad") != 0 && string.Compare(mejora, "Suerte") != 0);
-            switch(mejora)
-            {
-                case "Fuerza":
-                    pj1.AumentarFuerza();
-                    Console.WriteLine("aumentaste tu fuerza a: "+pj1.Fuerza);
-                    break;
-                case "Velocidad":
-                    pj1.AumentarVelocidad();
-                    Console.WriteLine("aumentaste tu velocidad a: "+pj1.Velocidad);
-                    break;
-                case "Suerte":
-                    pj1.AumentarSuerte();
-                    Console.WriteLine("aumentaste tu suete a: "+pj1.Suerte);
-                    break;
-            }
             if(LargoPalabras <= 7)
             {
                 LargoPalabras++;
@@ -218,6 +199,49 @@ while(true)
             {
                 cantPalabras++;
             }
+            
+            while(!sePudoAumentar)
+            {    
+                do
+                {
+                    Console.WriteLine("¿Qué deseas mejorar?\nFuerza\nVelocidad\nSuerte");
+                    mejora =Console.ReadLine();
+                }while(string.Compare(mejora, "Fuerza") != 0 && string.Compare(mejora, "Velocidad") != 0 && string.Compare(mejora, "Suerte") != 0);
+                switch(mejora)
+                {
+                    case "Fuerza":
+                        if(pj1.Fuerza <= cantPalabras/2)
+                        {
+                            pj1.AumentarFuerza();
+                            Console.WriteLine("aumentaste tu fuerza a: "+pj1.Fuerza);
+                            sePudoAumentar = true;
+                        }
+                        else
+                        {
+
+                            Console.WriteLine("no pudiste aumentar tu fuerza");
+                        }
+                        break;
+                    case "Velocidad":
+                        if(pj1.Velocidad <= LargoPalabras - 2)
+                        {
+                            pj1.AumentarVelocidad();
+                            Console.WriteLine("aumentaste tu velocidad a: "+pj1.Velocidad);
+                            sePudoAumentar = true;
+                        }
+                        else
+                        {
+                            Console.WriteLine("no pudiste aumentar tu velocidad");
+                        }
+                        break;
+                    case "Suerte":
+                        pj1.AumentarSuerte();
+                        Console.WriteLine("aumentaste tu suerte a: "+pj1.Suerte);
+                        sePudoAumentar = true;
+                        break;
+                }
+            }
+            sePudoAumentar = false;
             Thread.Sleep(1000);
             Console.Clear();
         }

@@ -8,7 +8,7 @@ namespace clases
         private Random randi = new Random();
         private double sumaVel = 0;
         private int cantPalabrasEs = 0;
-        private double palabrasVel = 1;
+        private double palabrasVel = 0;
         private double coefImportancia = 1;
 
         public HttpClient Client = new HttpClient();
@@ -16,7 +16,7 @@ namespace clases
         public int Velocidad { get; set; }
         public int Suerte { get; set; }
         public bool Turno { get; set; }
-        public double PalabrasVel { get => palabrasVel; }
+        public double PalabrasVel { get => palabrasVel; set => palabrasVel = value; }
         public double SumaVel { get => sumaVel; set => sumaVel = value; }
         public int CantPalabrasEscritas { get => cantPalabrasEs; set => cantPalabrasEs = value; }
         public double CoefImportancia { get => coefImportancia; set => coefImportancia = value; }                                   //solo para el contrincante
@@ -121,7 +121,7 @@ namespace clases
         private static bool escrito = false;
         private static bool golpeOtro = false;
         private static string? palabra = string.Empty;
-        private static double tiempoOtro;
+        private static int tiempoOtro;
         private static Random randOtro = new Random();
         private static bool criticoOtro = false;
         private static bool escribir = true;
@@ -129,6 +129,7 @@ namespace clases
         public int Nronda { get; set; }
         public int CantRondas { get; set; }
         public int TiempoRestante { get; set; }
+        public int TiempoRestanteOtro { get; set; }
         public int TiempoDisponible { get => tiempoDisponible; }
         public string? Palabra { get => palabra; }
         public bool Critico { get => critico; }
@@ -231,7 +232,7 @@ namespace clases
         {
             Console.WriteLine("es turno del otro:");
             double randO = randOtro.NextDouble();
-            tiempoOtro = tiempoDisponible/3*(1-VelociadMedia*CoefImp + randO*(5-2*VelociadMedia*CoefImp));
+            tiempoOtro = (int)Math.Round(tiempoDisponible/3*(1-VelociadMedia*CoefImp + randO*(5-2*VelociadMedia*CoefImp)));
             criticoOtro = false;
             golpeOtro = false;
             Thread.Sleep(3000);
@@ -246,12 +247,17 @@ namespace clases
             else
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("FALLO");
+                Console.WriteLine("FALLO");
             }
             Console.ForegroundColor = ConsoleColor.White;
             if(tiempoOtro < tiempoDisponible/3)
             {
                 criticoOtro = true;
+                TiempoRestanteOtro = tiempoDisponible;
+            }
+            else
+            {
+                TiempoRestanteOtro = tiempoDisponible - tiempoOtro;
             }
         }
 
@@ -278,6 +284,7 @@ namespace clases
             p.Fuerza = fuerza;
             p.Velocidad = velocidad;
             p.Suerte = suerte;
+            p.PalabrasVel = 1;
             p.CoefImportancia = Math.Tanh(0.4*suertePj);
 
             return p;

@@ -47,7 +47,7 @@ momentoDeFinalización es double --> tiempoDeEscritura es double --> tiempoResta
 
 ## Partida
 > El jugador tiene un tiempo para escribir la palabra (*tiempoDispobible*). Si pasa ese tiempo, pierde el turno.
-> El jugador tiene un tiempo de *tiempoDispoble/4* para escribir la palabra y sacar crítico. Si pasa ese tiempo, se continúa con la cuenta del *tiempoDisponible*.
+> El jugador tiene un tiempo de *tiempoDispoble/3* para escribir la palabra y sacar crítico. Si pasa ese tiempo, se continúa con la cuenta del *tiempoDisponible*.
 > El golpe crítico se obtiene si el *tiempoDeEscritura = 0*, donde *tiempoDeEscritura = momentoDeFinalización - momentoDeIniciación*.
 > Para que sea posible que *momentoDeFinalización = momentoDeIniciación*, 
 
@@ -57,7 +57,7 @@ El valor máximo de la fuerza es *cantidad de golpes Iniciales/2*.
 
 EL valor máximo de la suerte es *1/(Math.Exp((cantGolpes/2 - 1)*Math.Log(S)+Math.Log(b))+1)*.
 
-El tiempo de escritura del otro puede ser mayor al tiempo disponible o menor a dicho valor. La velocidad del otro tiene un valor máximo tal que su tiempo de escritura sea próximo a *tiempoDisponible/4*.
+El tiempo de escritura del otro puede ser mayor al tiempo disponible o menor a dicho valor. La velocidad del otro tiene un valor máximo tal que su tiempo de escritura sea próximo a *tiempoDisponible/3*.
 
 # Problemas que tuve
 
@@ -94,7 +94,6 @@ Lo que sucedía era que opté por usar un timer que invocaba la ejecución de un
 Lo que hice para solucionar este problema es trabajar con *Console.ReadKey()* en vez de *Console.ReadLine()*, y lo ejecuto dentro de un bucle *While* que itera mientras el tiempo *"tiempoDisponible"* no haya pasado: si pasa el tiempo, la condición del *While* pasa a *false*, y si se aprieta ENTER antes de la terminación del tiempo disponible, se interrumpe la linea principal.
 
 
-## La cadena recibida es incorrecta si se borró algún caractér
-Este problema se generó al momento de solucionar el anterior. El caractér *Backspace* se guardaba en la cadena de salida.
-Hice que se detectara cuando el jugador preciona *Backspace*, y que se borré el último caractér de la cadena de salida.
-
+## La cadena recibida es incorrecta si se borró algún caracter
+Este problema se generó al momento de solucionar el anterior. El caracter *Backspace* se guardaba en la cadena de salida.
+Hice que se detectara cuando el jugador preciona *Backspace*, y que se borré el último caracter de la cadena de salida.
