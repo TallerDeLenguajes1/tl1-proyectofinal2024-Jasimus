@@ -340,9 +340,10 @@ namespace clases
             return lp;
         }
 
-        public void GuardadJugador(Personaje pj, string alias, string tipo, int rondasJugadas)
+        public void GuardarJugador(Personaje pj, string alias, string tipo, int rondasJugadas, bool gana)
         {
-            string url = "./historialJugador.json";
+            string url1 = "./historialJugador.json";
+            string url2 = "./historialGanadores.json";
             InfoJugador infoJ = new InfoJugador();
 
             infoJ.Alias = alias;
@@ -356,13 +357,25 @@ namespace clases
 
             string infoJson = JsonSerializer.Serialize(infoJ);
 
-            if(!File.Exists(url))
+            if(gana)
             {
-                File.WriteAllText(url, infoJson+"\n");
+                if(!File.Exists(url2))
+                {
+                    File.WriteAllText(url2, infoJson+"\n");
+                }
+                else
+                {
+                    File.AppendAllText(url2, infoJson+"\n");
+                }    
+            }
+            if(!File.Exists(url1))
+            {
+                File.WriteAllText(url1, infoJson+"\n");
             }
             else
             {
-                File.AppendAllText(url, infoJson+"\n");
+                File.AppendAllText(url1, infoJson+"\n");
+            }
             }
         }
     }

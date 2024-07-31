@@ -19,6 +19,7 @@ int cantPalabras = 5;
 int LargoPalabras = 3;
 double fuerzaGolpe;
 bool sePudoAumentar = false;
+bool gana = false;
 
 List<string> PalabrasRonda = new List<string>();
 Random idiomaRandom = new Random();
@@ -84,8 +85,8 @@ while(true)
         arbol.LadoJugadorMetodo(cantPalabras);
         arbol.LadoContrincante();
         Lenguaje idioma = (Lenguaje)idiomaRandom.Next(0, 3);
-        PalabrasRonda = await partida.PedirPalabras(idioma/*Lenguaje.es*/, 20, LargoPalabras - pj1.Velocidad, pj1.Client);
-        // PalabrasRonda = ["a", "s", "d", "f", " ", "mañana", "sin duda", "cuál año", "dea", "el chuqui", "dabo", "el chocas", "el rubius", "y así"];
+        // PalabrasRonda = await partida.PedirPalabras(idioma/*Lenguaje.es*/, 20, LargoPalabras - pj1.Velocidad, pj1.Client);
+        PalabrasRonda = ["lagaña", "servir", "Jugar", "mañana", "sin duda", "cuál año", "dea", "el chuqui", "dabo", "el chocas", "el rubius", "y así"];
         int indice = 0;
         pj1.Turno = true;
         arbol.Cayo = false;
@@ -256,7 +257,12 @@ while(true)
     }
 }
 
-personajesJson.GuardadJugador(pj1, alias, tipoLeniador, rondaActual-1);
+if(rondaActual - 1 == cantRondasInt)
+{
+    gana = true;
+}
+
+personajesJson.GuardarJugador(pj1, alias, tipoLeniador, rondaActual-1, gana);
 
 if(PContraPartida.Count != 0)
 {
