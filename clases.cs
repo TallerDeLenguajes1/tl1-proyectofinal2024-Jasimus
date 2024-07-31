@@ -376,7 +376,6 @@ namespace clases
             {
                 File.AppendAllText(url1, infoJson+"\n");
             }
-            }
         }
     }
 
