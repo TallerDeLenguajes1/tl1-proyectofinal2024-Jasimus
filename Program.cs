@@ -26,15 +26,15 @@ Random idiomaRandom = new Random();
 Console.Clear();
 do
 {
-    Console.Write("ingrese la cantidad de rondas (mayor a cero): ");
+    Console.Write("ingrese la cantidad de rondas (0 < cant <= 10): ");
     cantRondas = Console.ReadLine();
-}while(!int.TryParse(cantRondas, out cantRondasInt) && cantRondasInt <= 0);
+}while(!int.TryParse(cantRondas, out cantRondasInt) || cantRondasInt <= 0 || cantRondasInt > 10);
 
 do
 {
     Console.Write("ingrese el alias de su leñador: ");
     alias = Console.ReadLine();
-}while(alias == string.Empty);
+}while(string.IsNullOrEmpty(alias));
 
 do
 {
@@ -85,8 +85,8 @@ while(true)
         arbol.LadoJugadorMetodo(cantPalabras);
         arbol.LadoContrincante();
         Lenguaje idioma = (Lenguaje)idiomaRandom.Next(0, 3);
-        // PalabrasRonda = await partida.PedirPalabras(idioma/*Lenguaje.es*/, 20, LargoPalabras - pj1.Velocidad, pj1.Client);
-        PalabrasRonda = ["lagaña", "servir", "Jugar", "mañana", "sin duda", "cuál año", "dea", "el chuqui", "dabo", "el chocas", "el rubius", "y así"];
+        PalabrasRonda = await partida.PedirPalabras(idioma/*Lenguaje.es*/, 20, LargoPalabras - pj1.Velocidad, pj1.Client);
+        // PalabrasRonda = ["lagaña", "servir", "Jugar", "mañana", "sin duda", "cuál año", "dea", "el chuqui", "dabo", "el chocas", "el rubius", "y así"];
         int indice = 0;
         pj1.Turno = true;
         arbol.Cayo = false;
