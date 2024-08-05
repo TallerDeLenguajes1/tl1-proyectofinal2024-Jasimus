@@ -79,9 +79,9 @@ namespace clases
         public bool Cayo { get => cayo; set => cayo = value; }
         public bool Sigue { get; set; }
         
-        public void LadoJugadorMetodo(int cantGolpesInicial)
+        public void LadoJugadorMetodo(int cantGolpesInicial, int fuerzapj)
         {
-            CantidadGolpesTotalpj = cantGolpesInicial;
+            CantidadGolpesTotalpj = cantGolpesInicial * (fuerzapj + 1);
             LadoJugador = CantidadGolpesTotalpj;
         }
 

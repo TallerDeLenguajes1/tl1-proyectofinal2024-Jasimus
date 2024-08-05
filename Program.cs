@@ -82,7 +82,7 @@ while(true)
 
     if (arbol.Sigue)
     {
-        arbol.LadoJugadorMetodo(cantPalabras);
+        arbol.LadoJugadorMetodo(cantPalabras, pj1.Fuerza);
         arbol.LadoContrincante();
         Lenguaje idioma = (Lenguaje)idiomaRandom.Next(0, 3);
         PalabrasRonda = await partida.PedirPalabras(idioma/*Lenguaje.es*/, 20, LargoPalabras - pj1.Velocidad, pj1.Client);
